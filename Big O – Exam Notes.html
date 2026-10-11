@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Big O – Exam Notes</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f5f1;--card:#fff;--ink:#1d1d1b;--mute:#6b6a64;--line:#e2e0d8;--acc:#2f6fed;--accbg:#e7efff;--hl:#fff3b8;--good:#1f8a4c;--bad:#c93b3b;--code:#f0eee7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--card:#1f2026;--ink:#ecebe6;--mute:#9a998f;--line:#32333b;--acc:#7aa2ff;--accbg:#27324f;--hl:#5a4d12;--good:#58c98a;--bad:#ff7b7b;--code:#191a1f}}
+:root[data-theme="dark"]{--bg:#15161a;--card:#1f2026;--ink:#ecebe6;--mute:#9a998f;--line:#32333b;--acc:#7aa2ff;--accbg:#27324f;--hl:#5a4d12;--good:#58c98a;--bad:#ff7b7b;--code:#191a1f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:18px 16px 8px;max-width:760px;margin:auto}h1{font-size:1.35rem;margin:0}header p{margin:4px 0 0;color:var(--mute);font-size:.9rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;max-width:760px;margin:auto}
+button{font:inherit;color:var(--ink);cursor:pointer}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:99px;font-size:.88rem}
+.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:760px;margin:auto;padding:14px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.card h3{margin:0 0 6px;font-size:1rem}
+.big{font-size:1.05rem}.mn{background:var(--accbg);border-color:transparent}
+pre{margin:6px 0;background:var(--code);border-radius:10px;padding:10px 12px;overflow-x:auto;font:13px/1.6 ui-monospace,Menlo,Consolas,monospace}
+code{background:var(--code);padding:1px 5px;border-radius:5px;font-size:.88em}
+table{border-collapse:collapse;width:100%;font-size:.84rem}th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}th{background:var(--code)}
+.scroll{overflow-x:auto}ul{margin:0;padding-left:20px}li{margin:3px 0}.bad li::marker{color:var(--bad)}
+.o{display:inline-block;background:var(--acc);color:#fff;border-radius:6px;padding:1px 9px;font-weight:600;font-size:.9rem}
+.ladder{display:flex;flex-direction:column;gap:6px}
+.ladder div{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--code)}
+.ladder b{flex:none;width:86px}.ladder span{font-size:.88rem;color:var(--mute)}
+.bar{height:8px;border-radius:4px;background:var(--acc);margin-top:3px}
+input[type=range]{width:100%}
+.opt{display:inline-block;margin:4px 4px 0 0;border:1px solid var(--line);background:var(--card);padding:6px 12px;border-radius:8px;font-size:.88rem}
+.opt.ok{background:var(--good);color:#fff;border-color:var(--good)}.opt.no{background:var(--bad);color:#fff;border-color:var(--bad)}
+.exp{margin-top:8px;font-size:.9rem;display:none}.exp.show{display:block}
+.hint{font-size:.8rem;color:var(--mute)}
+.tool{border:1px solid var(--line);background:var(--card);padding:6px 12px;border-radius:8px;font-size:.82rem;margin:0 0 12px}
+</style></head><body>
+<header><h1>Big O Notation – Exam Notes</h1><p>Week 3 · learn the ladder, the 5 rules, then drill the quiz.</p></header>
+<nav><div class="tabs" id="tabs"></div></nav>
+<main id="app"></main>
+<script>
+const $=s=>document.querySelector(s),app=$('#app');
+const tbl=(h,r)=>`<div class="scroll"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const O=x=>`<span class="o">${x}</span>`;
+const S={};
+
+S["Basics"]=()=>`
+<div class="card big"><h2>💡 Big idea</h2>Big O describes how the <b>work (or memory) grows</b> as the input size <code>n</code> gets large. It is <b>not</b> exact seconds.</div>
+<div class="card mn big"><h2>🧠 Memory hook</h2><b>Big O = growth rate.</b> Ask: “If n gets 10× bigger, what happens to the work?”</div>
+<div class="card"><h2>Two resources</h2>
+<ul><li><b>Time complexity</b> – how the number of operations grows.</li><li><b>Space complexity</b> – how much <i>extra</i> memory grows.</li></ul></div>
+<div class="card"><h2>What is n?</h2>
+${tbl(["Thing","n ="],[["Array [10,20,30,40,50]","5 (elements)"],["String \"HELLO\"","5 (characters)"],["Graph","number of vertices (V), edges (E)"]])}</div>
+<div class="card"><h2>First example</h2><pre>for (int i = 0; i &lt; n; i++)
+    cout &lt;&lt; i;</pre>n=10 → ~10 steps · n=1,000 → ~1,000 · n=1,000,000 → ~1,000,000 ⇒ ${O("O(n)")}</div>
+<div class="card"><h2>Why it matters</h2>Linear search checks one by one (O(n)). Binary search halves each time (O(log n)). For 1,000,000,000 students: ~1 billion vs ~30 checks.</div>`;
+
+const L=[["O(1)","Constant","No growth with n","arr[5], push, pop, enqueue, dequeue",1],["O(log n)","Logarithmic","Very slow growth","Binary search, i*=2 loop",2],["O(n)","Linear","Grows with n","Loop once, linear search",3],["O(n log n)","Linearithmic","Slightly worse than n","Merge sort, heap sort, avg quick sort",4],["O(n²)","Quadratic","Grows rapidly","Nested loops, bubble sort",5],["O(2ⁿ)","Exponential","Doubles per +1 in n","Naive recursive Fibonacci",6],["O(n!)","Factorial","Extreme","All permutations",7]];
+S["Growth"]=()=>`
+<div class="card mn big"><h2>🧠 Memory hook (slow → fast growth)</h2><b>“Cats Like Lying Near Quiet Empty Fields”</b><br><small>Constant · Logarithmic · Linear · Linearithmic · Quadratic · Exponential · Factorial</small></div>
+<div class="card"><h2>The ladder</h2><div class="ladder">${L.map(x=>`<div><b>${x[0]}</b><span><b>${x[1]}</b> – ${x[2]}<br>${x[3]}</span></div>`).join('')}</div>
+<p class="hint">This is about growth rate, not guaranteed wall-clock time.</p></div>
+<div class="card"><h2>🎚 Feel the difference – pick n</h2>
+<input type="range" id="sl" min="1" max="60" value="10"><p>n = <b id="nv">10</b></p><div id="gt"></div></div>
+<div class="card"><h2>Key numbers</h2>
+<ul><li>n=16: 16→8→4→2→1 = <b>4</b> halvings = log₂16</li><li>log₂(1,000,000) ≈ <b>20</b></li><li>2ⁿ: 2, 4, 8, 16, 32 … doubles each +1</li><li>5! = 120 · 10! = 3,628,800</li></ul></div>`;
+S.Growth.after=()=>{const sl=$('#sl');const f=v=>v>=1e9?v.toExponential(1):Math.round(v).toLocaleString();
+const go=()=>{const n=+sl.value;$('#nv').textContent=n;let fa=1;for(let i=2;i<=n;i++)fa*=i;
+const v=[1,Math.log2(n),n,n*Math.log2(n),n*n,Math.pow(2,n),fa];const m=Math.log10(Math.max(...v.map(x=>x+1)));
+$('#gt').innerHTML=L.map((x,i)=>`<div style="margin:6px 0"><b>${x[0]}</b> ≈ ${f(v[i])}<div class="bar" style="width:${Math.max(2,100*Math.log10(v[i]+1)/m)}%"></div></div>`).join('')};
+sl.oninput=go;go()};
+
+S["Rules"]=()=>`
+<div class="card mn big"><h2>🧠 Memory hook</h2><b>Drop constants · Drop small terms · Add side-by-side · Multiply nested · Halving = log</b></div>
+<div class="card"><h3>1 · Ignore constants</h3><pre>for (int i = 0; i &lt; 2*n; i++) cout &lt;&lt; i;</pre>~2n steps → O(2n) = ${O("O(n)")}</div>
+<div class="card"><h3>2 · Ignore lower-order terms</h3>T(n) = n² + n + 10 → keep the biggest: ${O("O(n²)")}</div>
+<div class="card"><h3>3 · Consecutive loops → ADD</h3><pre>for (i&lt;n) ...;
+for (j&lt;n) ...;</pre>O(n) + O(n) = O(2n) = ${O("O(n)")}</div>
+<div class="card"><h3>4 · Nested independent loops → MULTIPLY</h3><pre>for (i&lt;n)
+  for (j&lt;n) ...;</pre>n × n = ${O("O(n²)")} · three nested = n×n×n = ${O("O(n³)")}</div>
+<div class="card"><h3>5 · Loop that doubles/halves → log n</h3><pre>for (int i = 1; i &lt; n; i = i*2)</pre>i = 1,2,4,8,16,32… → about log₂n times ⇒ ${O("O(log n)")}</div>
+<div class="card"><h3>Combination</h3>Loop O(n) then doubling loop O(log n): O(n + log n) → keep the larger ⇒ ${O("O(n)")}</div>
+<div class="card"><h2>Best / worst / average (linear search)</h2>${tbl(["Case","Meaning","Cost"],[["Best","Found at first element","O(1)"],["Worst","At the end / not there","O(n)"],["Average","Somewhere in the middle","O(n)"]])}</div>
+<div class="card"><h2>Binary search – 4 lines to remember</h2><pre>low = 0, high = n-1
+while (low &lt;= high) {
+  mid = (low+high)/2
+  if arr[mid]==key  return mid
+  if arr[mid]&lt;key   low = mid+1
+  else              high = mid-1
+}  return -1</pre>Each loop throws away half ⇒ ${O("O(log n)")}. <b>Needs sorted data.</b></div>
+<div class="card"><h2>Space complexity</h2>${tbl(["Code","Space"],[["<code>int x;</code>","O(1)"],["<code>int arr[n];</code>","O(n)"],["<code>new int[n]</code>","O(n)"]])}</div>`;
+
+S["Tables"]=()=>`
+<div class="card"><h2>Time vs space</h2>${tbl(["Algorithm","Time","Extra space"],[["Array index access","O(1)","O(1)"],["Linear search","O(n)","O(1)"],["Binary search","O(log n)","O(1)*"],["Bubble sort","O(n²)","O(1)"],["Merge sort","O(n log n)","O(n)"],["Hash lookup","O(1) avg*","O(n)"],["Traverse linked list","O(n)","O(1)"]])}</div>
+<div class="card"><h2>Data structures</h2>${tbl(["Structure","Access","Search","Insert","Delete"],[["Array","O(1)","O(n)","O(n)","O(n)"],["Linked list","O(n)","O(n)","O(1)*","O(1)*"],["Stack","O(1) top","O(n)","O(1)","O(1)"],["Queue","O(1) front","O(n)","O(1)","O(1)"],["BST","O(log n)*","O(log n)*","O(log n)*","O(log n)*"],["Hash table","—","O(1)*","O(1)*","O(1)*"]])}
+<p class="hint">* Typical/average. Unbalanced BST → O(n). Hash table worst → O(n). Linked list O(1) insert/delete assumes you already hold the position.</p></div>
+<div class="card"><h2>Algorithms</h2>${tbl(["Algorithm","Complexity"],[["Linear search","O(n)"],["Binary search","O(log n)"],["Bubble / Selection / Insertion sort","O(n²) worst"],["Merge sort · Heap sort","O(n log n)"],["Quick sort","O(n²) worst · O(n log n) avg"],["BFS · DFS","O(V + E)"]])}</div>
+<div class="card mn"><h2>🧠 Hooks</h2>Stack/Queue ends = <b>O(1)</b> · searching a stack/queue = <b>O(n)</b> · “good” sorts = <b>n log n</b> · simple sorts = <b>n²</b> · tree/hash = <b>depends – know the assumption</b>.</div>`;
+
+const Q=[["int x = arr[5];","O(1)","Fixed work, doesn't depend on n."],
+["for (int i=0;i<n;i++) cout<<i;","O(n)","One loop of n."],
+["for (i<n)\n  for (j<n)\n    cout<<i+j;","O(n²)","Nested → multiply n×n."],
+["for (int i=1;i<n;i*=2) cout<<i;","O(log n)","i doubles → log₂n steps."],
+["for (i<n) cout<<i;\nfor (j<n) cout<<j;","O(n)","Consecutive → add: n+n = 2n → drop constant."],
+["for (i<n)\n for (j<n)\n  for (k<n)\n   cout<<i+j+k;","O(n³)","Three nested → n×n×n."],
+["for (int i=0;i<2*n;i++) cout<<i;","O(n)","2n → ignore constant 2."],
+["for (i<n) cout<<i;\nfor (i=1;i<n;i*=2) cout<<i;","O(n)","n + log n → n dominates."],
+["T(n) = n² + n + 10","O(n²)","Keep only the dominant term."],
+["Push onto a stack","O(1)","Only touches the top."],
+["Binary search on a sorted array","O(log n)","Halves the search area each step."],
+["Naive recursive fibonacci(n)","O(2ⁿ)","Two recursive calls per level → calls grow exponentially."]];
+const OPTS=["O(1)","O(log n)","O(n)","O(n log n)","O(n²)","O(n³)","O(2ⁿ)"];
+let qs=0,qa=0;
+S["Quiz"]=()=>`<div class="card"><h2>Pick the Big O</h2><p class="hint">Answer before revealing. Score: <b id="sc">0/0</b></p></div>`+Q.map((q,i)=>`<div class="card" data-q="${i}"><h3>Q${i+1}</h3><pre>${q[0].replace(/&/g,'&amp;').replace(/</g,'&lt;')}</pre>${OPTS.map(o=>`<button class="opt">${o}</button>`).join('')}<div class="exp"></div></div>`).join('');
+S.Quiz.after=()=>{qs=0;qa=0;app.querySelectorAll('[data-q]').forEach(c=>{const q=Q[+c.dataset.q];let done=false;
+c.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(done)return;done=true;qa++;const ok=b.textContent===q[1];if(ok)qs++;
+b.classList.add(ok?'ok':'no');if(!ok)c.querySelectorAll('.opt').forEach(x=>{if(x.textContent===q[1])x.classList.add('ok')});
+const e=c.querySelector('.exp');e.textContent=(ok?'✔ ':'✘ ')+q[1]+' – '+q[2];e.classList.add('show');$('#sc').textContent=qs+'/'+qa})})};
+
+S["Traps"]=()=>`
+<div class="card bad"><h2>⚠️ Common mistakes</h2><ul>
+<li><b>“O(n) = exactly n seconds”</b> ✘ → it describes how work <i>grows</i>.</li>
+<li><b>Multiplying consecutive loops</b> ✘ → side-by-side loops are <b>added</b>: O(n+n)=O(n).</li>
+<li><b>Ignoring nested loops</b> ✘ → both ~n ⇒ O(n²).</li>
+<li><b>“Every loop is O(n)”</b> ✘ → <code>i *= 2</code> is O(log n).</li>
+<li><b>Forgetting the input condition</b> ✘ → binary search needs sorted data.</li></ul></div>
+<div class="card"><h2>Exam checklist</h2><ol style="margin:0;padding-left:20px"><li>Find the loops. Nested? Multiply. Side by side? Add.</li><li>Does the counter double/halve? → log n.</li><li>Drop constants and smaller terms.</li><li>Name it from the ladder.</li><li>Memory too? Count extra arrays only.</li></ol></div>
+<div class="card mn big"><h2>🧠 One-liner to write in answers</h2>“Big O describes how an algorithm’s time or space grows as the input size n grows.”</div>`;
+
+const names=Object.keys(S),tabs=$('#tabs');
+function show(n){app.innerHTML=S[n]();S[n].after&&S[n].after();[...tabs.children].forEach(b=>b.classList.toggle('on',b.textContent===n));window.scrollTo(0,0)}
+names.forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>show(n);tabs.appendChild(b)});
+show("Basics");
+</script></body></html>
